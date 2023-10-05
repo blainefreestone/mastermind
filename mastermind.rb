@@ -1,6 +1,7 @@
 class Board
   def initialize(secret_code)
     @board_status = Array.new(12, Turn.new)
+    @secret_code_values = secret_code.split('')
   end
 
   def board_to_text
@@ -37,7 +38,16 @@ class Turn
   end
 
   def get_clues(secret_code_values)
-    pass
+    exact_position = 0
+    same_color = 0
+
+    [exact_position, same_color]
+  end
+
+  def compare_number_counts(secret_code_values)
+    secret_code_number_count = secret_code_values.each_with_object(Hash.new(0)) { |value, number_count| number_count[value] += 1 }
+    guess_number_count = @guess..each_with_object(Hash.new(0)) { |value, number_count| number_count[value] += 1 }
+    [1..6].each { |number| secret_code_number_count[number] < guess_number_count[number] ? secret_code_number_count[number] : guess_number_count[number] }
   end
 end
 
@@ -54,29 +64,3 @@ class Game
 end
 
 puts Board.new(1234).board_to_text
-
-#    --------------------●---○---
-#  1 || 1 | 2 | 3 | 4 || 2 | 1 ||
-#    -+---+---+---+---++---+---+-
-#  2 ||   |   |   |   ||   |   ||
-#    -+---+---+---+---++---+---++
-#  3 ||   |   |   |   ||   |   ||
-#    -+---+---+---+---++---+---++
-#  4 ||   |   |   |   ||   |   ||
-#    -+---+---+---+---++---+---++
-#  5 ||   |   |   |   ||   |   ||
-#    -+---+---+---+---++---+---++
-#  6 ||   |   |   |   ||   |   ||
-#    -+---+---+---+---++---+---++
-#  7 ||   |   |   |   ||   |   ||
-#    -+---+---+---+---++---+---++
-#  8 ||   |   |   |   ||   |   ||
-#    -+---+---+---+---++---+---++
-#  9 ||   |   |   |   ||   |   ||
-#    -+---+---+---+---++---+---++
-# 10 ||   |   |   |   ||   |   ||
-#    -+---+---+---+---++---+---++
-# 11 ||   |   |   |   ||   |   ||
-#    -+---+---+---+---++---+---++
-# 12 ||   |   |   |   ||   |   ||
-#    ----------------------------
