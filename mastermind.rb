@@ -1,14 +1,32 @@
 class Board
   def initialize(secret_code)
-    @board_status = (Array.new(13, Turn.new))
+    @board_status = Array.new(12, Turn.new)
+  end
+
+  def board_to_text
+    top_border = '    --------------------●---○---'
+    bottom_border = '    ----------------------------'
+    row_seperator = '    -+---+---+---+---++---+---+-'
+    turn_text = ->(turn, turn_number) { (turn_number + 1).to_s.rjust(3) + ' ' + turn.turn_to_text }
+    top_border + "\n" + @board_status.each_with_index.map(&turn_text).join(row_seperator + "\n") + bottom_border
   end
 end
 
 class Turn
-  def initialize
-    @is_clued = false
+  def initialize()
     @guess = Array.new(4)
-    @clues = Array.new(4)
+    @clues = {
+      correct_color: nil,
+      correct_position: nil
+    }
+  end
+
+  def turn_to_text
+    side_border = '|| '
+    col_seperator = ' | '
+    guess = @guess.map { |guess_value| guess_value || ' ' }.join(col_seperator)
+    clues = @clues.map { |_, clue_value| clue_value || ' ' }.join(col_seperator)
+    side_border + [guess, clues, "\n"].join(' ' + side_border)
   end
 end
 
@@ -23,3 +41,31 @@ class Game
     @board = Board.new
   end
 end
+
+puts Board.new(1234).board_to_text
+
+#    --------------------●---○---
+#  1 || 1 | 2 | 3 | 4 || 2 | 1 ||
+#    -+---+---+---+---++---+---+-
+#  2 ||   |   |   |   ||   |   ||
+#    -+---+---+---+---++---+---++
+#  3 ||   |   |   |   ||   |   ||
+#    -+---+---+---+---++---+---++
+#  4 ||   |   |   |   ||   |   ||
+#    -+---+---+---+---++---+---++
+#  5 ||   |   |   |   ||   |   ||
+#    -+---+---+---+---++---+---++
+#  6 ||   |   |   |   ||   |   ||
+#    -+---+---+---+---++---+---++
+#  7 ||   |   |   |   ||   |   ||
+#    -+---+---+---+---++---+---++
+#  8 ||   |   |   |   ||   |   ||
+#    -+---+---+---+---++---+---++
+#  9 ||   |   |   |   ||   |   ||
+#    -+---+---+---+---++---+---++
+# 10 ||   |   |   |   ||   |   ||
+#    -+---+---+---+---++---+---++
+# 11 ||   |   |   |   ||   |   ||
+#    -+---+---+---+---++---+---++
+# 12 ||   |   |   |   ||   |   ||
+#    ----------------------------
