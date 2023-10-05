@@ -13,7 +13,7 @@ class Board
 end
 
 class Turn
-  def initialize()
+  def initialize
     @guess = Array.new(4)
     @clues = {
       correct_color: nil,
@@ -27,6 +27,17 @@ class Turn
     guess = @guess.map { |guess_value| guess_value || ' ' }.join(col_seperator)
     clues = @clues.map { |_, clue_value| clue_value || ' ' }.join(col_seperator)
     side_border + [guess, clues, "\n"].join(' ' + side_border)
+  end
+
+  def input_guess(guess_values)
+    @guess[0] = guess_values[0]
+    @guess[1] = guess_values[1]
+    @guess[2] = guess_values[2]
+    @guess[3] = guess_values[0]
+  end
+
+  def get_clues(secret_code_values)
+    pass
   end
 end
 
