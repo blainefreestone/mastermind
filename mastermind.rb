@@ -1,15 +1,21 @@
 class Board
   def initialize(secret_code)
-    @board_status = Array.new(12, Turn.new)
-    @secret_code_values = secret_code.to_s.split('')
+    @board_status = Array.new(12) { Turn.new }
+    @secret_code_values = secret_code
   end
 
   def board_to_text
-    top_border = '    --------------------●---○---'
+    top_border = '    --------------------○---●---'
     bottom_border = '    ----------------------------'
     row_seperator = '    -+---+---+---+---++---+---+-'
     turn_text = ->(turn, turn_number) { (turn_number + 1).to_s.rjust(3) + ' ' + turn.turn_to_text }
     top_border + "\n" + @board_status.each_with_index.map(&turn_text).join(row_seperator + "\n") + bottom_border
+  end
+
+  def update_turn(turn_number, guess_values)
+    @board_status[turn_number].input_guess(guess_values)
+    @board_status[turn_number].update_clues(@secret_code_values)
+    @board_status[turn_number].marked_correct?
   end
 end
 
@@ -47,6 +53,10 @@ class Turn
     @clues[:correct_position] = same_position_count
   end
 
+  def marked_correct?
+    @clues[:correct_position] == 4
+  end
+
   private
 
   def same_value_count(secret_code_values)
@@ -73,10 +83,45 @@ class Player
   def initialize(name)
     @name = name
   end
+
+  def guess_code
+    puts "#{@name}, please enter a 4 digit code (numbers 1-6):"
+    return_guess_values = []
+    Kernel.loop do
+      player_guess_values = gets.strip.split('').map(&:to_i)
+      is_valid_integer = ->(value) { value.to_i && value >= 1 && value <= 6 }
+      return_guess_values = player_guess_values
+      break if player_guess_values.all?(&is_valid_integer) && player_guess_values.length == 4
+
+      puts 'That is not a valid guess.'
+    end
+    return_guess_values
+  end
 end
 
 class Game
-  def initialize
-    @board = Board.new
+  def initialize(code_maker, decoder)
+    @board = Board.new([1, 2, 3, 4])
+    @code_maker = code_maker
+    @decoder = decoder
+  end
+
+  def play
+    decoded = false
+    (0..11).each do |turn_number|
+      system 'clear'
+      puts @board.board_to_text
+      decoded = @board.update_turn(turn_number, @decoder.guess_code)
+      break if decoded
+    end
+    system 'clear'
+    puts decoded ? 'The code was successfully decoded' : 'The code was not decoded'
+    puts @board.board_to_text
   end
 end
+
+player1 = Player.new('Blaine')
+player2 = Player.new('Destiny')
+
+game = Game.new(player1, player2)
+game.play
