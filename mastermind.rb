@@ -1,5 +1,3 @@
-require 'pry-byebug'
-
 class Board
   def initialize(secret_code)
     @board_status = Array.new(12, Turn.new)
@@ -13,18 +11,13 @@ class Board
     turn_text = ->(turn, turn_number) { (turn_number + 1).to_s.rjust(3) + ' ' + turn.turn_to_text }
     top_border + "\n" + @board_status.each_with_index.map(&turn_text).join(row_seperator + "\n") + bottom_border
   end
-
-  def count_test
-    @board_status[1].input_guess([1, 2, 3, 4])
-    @board_status[1].get_clues([4, 3, 2, 1])
-  end
 end
 
 class Turn
   def initialize
     @guess = Array.new(4)
     @clues = {
-      correct_color: nil,
+      correct_value: nil,
       correct_position: nil
     }
   end
@@ -44,21 +37,26 @@ class Turn
     @guess[3] = guess_values[3]
   end
 
-  def get_clues(secret_code_values)
-    get_same_color_count(secret_code_values)
+  def update_clues(secret_code_values)
+    same_position_count = @guess.each_with_index.reduce(0) do |count, (value, index)|
+      count += 1 if value == secret_code_values[index]
+      count
+    end
+
+    @clues[:correct_value] = same_value_count(secret_code_values) - same_position_count
+    @clues[:correct_position] = same_position_count
   end
 
-  def get_same_color_count(secret_code_values)
-    secret_code_number_count = code_number_count(secret_code_values)
+  private
 
-    secret_code_number_count.reduce(0) do |count, key, value|
-      greater_value = guess_number_count[key] > value ? value : guess_number_count[key]
-      count += greater_value
+  def same_value_count(secret_code_values)
+    secret_code_number_count(secret_code_values).reduce(0) do |count, (key, value)|
+      count += guess_number_count[key] > value ? value : guess_number_count[key]
       count
     end
   end
 
-  def code_number_count(secret_code_values)
+  def secret_code_number_count(secret_code_values)
     secret_code_values.each_with_object(Hash.new(0)) do |value, number_count|
       number_count[value] += 1
     end
@@ -82,6 +80,3 @@ class Game
     @board = Board.new
   end
 end
-
-board = Board.new(1234)
-board.count_test
